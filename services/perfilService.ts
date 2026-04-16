@@ -8,9 +8,10 @@ export async function getPerfil(
     .from('perfil_usuario')
     .select('*')
     .eq('usuario_id', usuarioId)
-    .single();
+    .maybeSingle(); // ← igual que useAuth, evita error 406
+
   if (error) return { perfil: null, error: error.message };
-  return { perfil: data as PerfilUsuario, error: null };
+  return { perfil: data as PerfilUsuario | null, error: null };
 }
 
 export type DatosPerfil = {
@@ -27,12 +28,16 @@ export async function completarPerfil(
 ): Promise<{ error: string | null }> {
   const { error } = await supabase
     .from('perfil_usuario')
-    .upsert({
-      usuario_id: usuarioId,
-      ...datos,
-      perfil_completo: true,
-      updated_at: new Date().toISOString(),
-    });
+    .upsert(
+      {
+        usuario_id: usuarioId,
+        ...datos,
+        perfil_completo: true,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'usuario_id' } // ← especifica la columna de conflicto
+    );
+
   if (error) return { error: error.message };
   return { error: null };
 }
