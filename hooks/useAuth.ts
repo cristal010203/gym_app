@@ -19,17 +19,20 @@ export function useAuth(): AuthState {
       .from('perfil_usuario')
       .select('*')
       .eq('usuario_id', userId)
-      .maybeSingle(); // ← clave: no lanza error si no hay fila
+      .maybeSingle(); // no lanza error si no hay fila
     setPerfil(data as PerfilUsuario | null);
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
+    async function init() {
+      const { data } = await supabase.auth.getSession();
       const s = data.session;
       setSession(s);
       if (s?.user) await cargarPerfil(s.user.id);
-      setLoading(false); // ← siempre llega aquí
-    });
+      setLoading(false);
+    }
+
+    init();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
@@ -39,10 +42,13 @@ export function useAuth(): AuthState {
         } else {
           setPerfil(null);
         }
+        setLoading(false);
       }
     );
 
-    return () => { listener.subscription.unsubscribe(); };
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   return { session, perfil, loading };

@@ -17,6 +17,15 @@ export type FiltrosEjercicio = {
   nivel?: string;
 };
 
+export type NuevoEjercicio = {
+  nombre: string;
+  grupo_muscular: string;
+  tipo: string;
+  nivel: string;
+  descripcion?: string;
+  video_url?: string;
+};
+
 export async function getEjercicios(
   filtros: FiltrosEjercicio = {}
 ): Promise<{ ejercicios: Ejercicio[]; error: string | null }> {
@@ -30,4 +39,24 @@ export async function getEjercicios(
   const { data, error } = await query;
   if (error) return { ejercicios: [], error: error.message };
   return { ejercicios: data as Ejercicio[], error: null };
+}
+
+export async function crearEjercicio(
+  datos: NuevoEjercicio
+): Promise<{ ejercicio: Ejercicio | null; error: string | null }> {
+  const { data, error } = await supabase
+    .from('ejercicio')
+    .insert({
+      nombre:         datos.nombre.trim(),
+      grupo_muscular: datos.grupo_muscular,
+      tipo:           datos.tipo,
+      nivel:          datos.nivel,
+      descripcion:    datos.descripcion?.trim() || null,
+      video_url:      datos.video_url?.trim() || null,
+    })
+    .select()
+    .single();
+
+  if (error) return { ejercicio: null, error: error.message };
+  return { ejercicio: data as Ejercicio, error: null };
 }

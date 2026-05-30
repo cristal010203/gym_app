@@ -2,11 +2,21 @@ import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '../../constants';
 
-function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
+function TabIcon({
+  emoji,
+  label,
+  focused,
+}: {
+  emoji: string;
+  label: string;
+  focused: boolean;
+}) {
   return (
     <View style={styles.tabIcon}>
       <Text style={styles.emoji}>{emoji}</Text>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>{label}</Text>
+      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>
+        {label}
+      </Text>
     </View>
   );
 }
@@ -41,6 +51,14 @@ export default function AppLayout() {
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon emoji="📋" label="Rutinas" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="logros"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon emoji="🏆" label="Logros" focused={focused} />
           ),
         }}
       />

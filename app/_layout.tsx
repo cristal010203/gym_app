@@ -14,18 +14,29 @@ export default function RootLayout() {
     if (loading) return;
 
     const enGrupoAuth = segments[0] === '(auth)';
+    const enOnboarding = segments[1] === 'onboarding';
 
     if (!session) {
-      // Sin sesión → ir a login
+      // Sin sesión → login
       if (!enGrupoAuth) router.replace('/(auth)/login');
-    } else if (!perfil?.perfil_completo) {
-      // Sesión pero sin perfil completo → onboarding
-      router.replace('/(auth)/onboarding');
-    } else {
-      // Sesión y perfil completo → app principal
-      if (enGrupoAuth) router.replace('/(app)/home');
+      return;
     }
-  }, [session, perfil, loading]);
+
+    // Sesión existe pero perfil aún no cargó → no redirigir todavía
+    if (perfil === null && !enOnboarding) {
+      return;
+    }
+
+    if (!perfil?.perfil_completo) {
+      // Perfil incompleto → onboarding (solo si no está ya ahí)
+      if (!enOnboarding) router.replace('/(auth)/onboarding');
+      return;
+    }
+
+    // Perfil completo → app principal
+    if (enGrupoAuth) router.replace('/(app)/home');
+
+  }, [session, perfil, loading, segments]);
 
   if (loading) {
     return (
